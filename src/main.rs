@@ -23,20 +23,34 @@ fn handle_connection(mut stream: TcpStream) {
     // read the TCP stream data into the buffer
     stream.read(&mut buffer).unwrap();
 
-    // read html file to string
-    let contents = fs::read_to_string("hello.html").unwrap();
+    // b to code as bytes
+    let get  = b"GET / HTTP/1.1\r\n";
 
-    // response to connection (Success)
-    let response = format!(
-        "HTTP/1.1 200 OK\r\nContent-Length: {}\r\n\r\n{}",
-        contents.len(),
-        contents
-    );
+    if buffer.starts_with(get) {
+        // read html file to string
+        let contents = fs::read_to_string("hello.html").unwrap();
 
-    // call as_bytes on response to send on TCP stream
-    stream.write(response.as_bytes()).unwrap();
+        // response to connection (Success)
+        let response = format!(
+            "HTTP/1.1 200 OK\r\nContent-Length: {}\r\n\r\n{}",
+            contents.len(),
+            contents
+        );
 
-    // flush will wait and prevent any program from continuing until
-    // all bytes are written to the connection
-    stream.flush().unwrap();
+        // call as_bytes on response to send on TCP stream
+        stream.write(response.as_bytes()).unwrap();
+
+        // flush will wait and prevent any program from continuing until
+        // all bytes are written to the connection
+        stream.flush().unwrap();
+    } else {
+        let status_line = "HTTP/1.1 404 NOT FOUND\r\n\r\n";
+        let contents = fs::read_to_string("404.html").unwrap();
+
+        let response = format!("{}{}", status_line, contents);
+
+        stream.write(response.as_bytes()).unwrap();
+        stream.flush().unwrap();
+    }
+
 }
