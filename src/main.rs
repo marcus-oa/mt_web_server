@@ -26,31 +26,16 @@ fn handle_connection(mut stream: TcpStream) {
     // b to code as bytes
     let get  = b"GET / HTTP/1.1\r\n";
 
-    if buffer.starts_with(get) {
-        // read html file to string
-        let contents = fs::read_to_string("hello.html").unwrap();
-
-        // response to connection (Success)
-        let response = format!(
-            "HTTP/1.1 200 OK\r\nContent-Length: {}\r\n\r\n{}",
-            contents.len(),
-            contents
-        );
-
-        // call as_bytes on response to send on TCP stream
-        stream.write(response.as_bytes()).unwrap();
-
-        // flush will wait and prevent any program from continuing until
-        // all bytes are written to the connection
-        stream.flush().unwrap();
+    let (status_line,filename) = if buffer.starts_with(get) {
+        ("HTTP/1.1 200 OK\r\n\r\n", "hello.html")
     } else {
-        let status_line = "HTTP/1.1 404 NOT FOUND\r\n\r\n";
-        let contents = fs::read_to_string("404.html").unwrap();
+        ("HTTP/1.1 404 NOT FOUND\r\n\r\n", "404.html")
+    };
 
-        let response = format!("{}{}", status_line, contents);
+    let contents = fs::read_to_string(filename).unwrap();
 
-        stream.write(response.as_bytes()).unwrap();
-        stream.flush().unwrap();
-    }
+    let response = format!("{}{}", status_line, contents);
 
+    stream.write(response.as_bytes()).unwrap();
+    stream.flush().unwrap();
 }
