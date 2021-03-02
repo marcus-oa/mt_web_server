@@ -22,6 +22,13 @@ fn handle_connection(mut stream: TcpStream) {
     // read the TCP stream data into the buffer
     stream.read(&mut buffer).unwrap();
 
-    // convert and print byte stream from buffer
-    println!("Request: {}", String::from_utf8_lossy(&buffer[..]));
+    // response to connection (Success)
+    let response = "HTTP/1.1 200 OK\r\n\r\n";
+
+    // call as_bytes on response to send on TCP stream
+    stream.write(response.as_bytes()).unwrap();
+
+    // flush will wait and prevent any program from continuing until
+    // all bytes are written to the connection
+    stream.flush().unwrap();
 }
