@@ -1,5 +1,6 @@
 use std::net::{TcpListener, TcpStream};
 use std::io::prelude::*;
+use std::fs;
 
 fn main() {
     // listen for incoming TCP streams at address 127.0.0.1:7878
@@ -22,8 +23,15 @@ fn handle_connection(mut stream: TcpStream) {
     // read the TCP stream data into the buffer
     stream.read(&mut buffer).unwrap();
 
+    // read html file to string
+    let contents = fs::read_to_string("hello.html").unwrap();
+
     // response to connection (Success)
-    let response = "HTTP/1.1 200 OK\r\n\r\n";
+    let response = format!(
+        "HTTP/1.1 200 OK\r\nContent-Length: {}\r\n\r\n{}",
+        contents.len(),
+        contents
+    );
 
     // call as_bytes on response to send on TCP stream
     stream.write(response.as_bytes()).unwrap();
