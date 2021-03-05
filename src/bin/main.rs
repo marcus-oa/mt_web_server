@@ -20,6 +20,8 @@ fn main() {
             handle_connection(stream)
         })
     }
+
+    println!("Shutting down.");
 }
 
 // read data from TCP stream and print data being sent from
